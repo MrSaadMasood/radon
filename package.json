@@ -2,9 +2,11 @@
   "name": "radon",
   "version": "1.0.0",
   "description": "in-memory key value store",
+  "type": "module",
   "main": "dist/index.js",
   "scripts": {
-    "test": "vitest run ./test/ --coverage"
+    "test": "vitest run ./test/minHeap.test.ts ./test/crud.test.ts --coverage",
+    "start": "tsc && node dist/index.js"
   },
   "author": "",
   "license": "ISC",
