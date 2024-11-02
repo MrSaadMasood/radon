@@ -4,7 +4,7 @@ import { ttlExpirationValidator } from "./utils/utils.js"
 
 const keyStoreMap: InMemoryStore = {}
 const minHeap = new MinHeap()
-const asyncLock = new AsyncLock
+const asyncLock = new AsyncLock()
 
 let EXPIRED_KEY_REMOVAL_TIME = 1000
 const MAX_TTL_VALUE = 10000000

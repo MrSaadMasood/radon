@@ -13,3 +13,14 @@ type ValueTTLObjectOfKeyValueStore = {
   timestamp?: number
   TTL?: number
 }
+
+type LRU = {
+  key: string
+  timestamp: number
+}
+
+type LFU = {
+  key: string
+  frequency: number
+}
+type NodeValue = LRU | LFU

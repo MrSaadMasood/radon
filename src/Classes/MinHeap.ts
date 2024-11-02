@@ -1,4 +1,4 @@
-import { ttlExpirationValidator } from "../utils/utils";
+import { ttlExpirationValidator } from "../utils/utils.js";
 
 class MinHeap {
   private readonly heapArray: HeapItem[]

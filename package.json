@@ -5,7 +5,7 @@
   "type": "module",
   "main": "dist/index.js",
   "scripts": {
-    "test": "vitest run ./test/minHeap.test.ts ./test/crud.test.ts --coverage",
+    "test": "vitest run ./test/ --coverage",
     "start": "tsc && node dist/index.js"
   },
   "author": "",
