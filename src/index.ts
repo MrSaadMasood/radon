@@ -1,18 +1,31 @@
 import { AsyncLock } from "./Classes/AsyncLock.js"
+import { LFUCache } from "./Classes/LFUCache.js"
+import { LRUCache } from "./Classes/LRUCache.js"
 import { MinHeap } from "./Classes/MinHeap.js"
+import { EVICTION_POLICY } from "./utils/envSchema.js"
 import { ttlExpirationValidator } from "./utils/utils.js"
 
 const keyStoreMap: InMemoryStore = {}
 const minHeap = new MinHeap()
 const asyncLock = new AsyncLock()
 
+const evictionPolicies = {
+  LRU: LRUCache,
+  LFU: LFUCache
+}
+
+const evictionPolicy = new evictionPolicies[EVICTION_POLICY]<NodeValue>()
+
 let EXPIRED_KEY_REMOVAL_TIME = 1000
 const MAX_TTL_VALUE = 10000000
+const STORE_CAPACITY = 3
 
 async function addKeyValueToMap(key: string, value: any, TTL?: string | number) {
   const objectToStore: ValueTTLObjectOfKeyValueStore = {
     value,
   }
+
+  const timestamp = Date.now()
 
   if (TTL) {
     const ttl = TTLInputValidator(TTL)
@@ -25,7 +38,7 @@ async function addKeyValueToMap(key: string, value: any, TTL?: string | number) 
         } else {
           minHeap.insert(heapItem)
           objectToStore.TTL = ttl
-          objectToStore.timestamp = Date.now()
+          objectToStore.timestamp = timestamp
         }
         const minHeapRootElem = minHeap.readRootElemValue()
         EXPIRED_KEY_REMOVAL_TIME = minHeapRootElem.TTL
@@ -37,9 +50,11 @@ async function addKeyValueToMap(key: string, value: any, TTL?: string | number) 
     async () => {
       await asyncLock.keyDataStoreProcessedAndLocked
       keyStoreMap[key] = objectToStore
+      evictionPolicy.updateCache(
+        generateUpdateCacheOptions(cacheItemGenerator(key, EVICTION_POLICY))
+      )
     }
   )
-  minHeap.print()
 }
 
 function TTLInputValidator(TTL: string | number) {
@@ -56,28 +71,37 @@ async function getValueFromMap(key: string) {
 
   await makeKeyStoreOperationsConsistent(async () => {
 
+    await asyncLock.keyDataStoreProcessedAndLocked
     let storedValue = keyStoreMap[key]
     if (!storedValue) return
 
     const keyExpired = isKeyExpired(storedValue)
     if (keyExpired) {
       delete keyStoreMap[key]
+      evictionPolicy.deleteCache(key)
       return minHeap.deleteFromMinHeapAndUpdateWithNewValue({ key, TTL: -1 })
     }
     valueFromMap = storedValue.value
+    Promise.resolve(() => {
+      evictionPolicy.updateCache(generateUpdateCacheOptions(cacheItemGenerator(key, EVICTION_POLICY)))
+    })
   })
   return valueFromMap
 }
 
 async function deleteKeyFromMap(key: string) {
   await makeKeyStoreOperationsConsistent(() => {
+    const deletedNode = evictionPolicy.deleteCache(key)
+    if (evictionPolicy instanceof LFUCache && deletedNode && deletedNode.val.type === "LFU") {
+      evictionPolicy.adjustFrequency(deletedNode.val.frequency, "DEC")
+    }
     delete keyStoreMap[key]
   })
 }
 
 async function removeExpiredKeysFromHeap() {
   await makeKeyStoreOperationsConsistent(() => {
-    const currRootElem = minHeap.cleanUpExpiredKeys(keyStoreMap)
+    const currRootElem = minHeap.cleanUpExpiredKeys(keyStoreMap, evictionPolicy)
     const expirationTimeOfHeapRootElem = currRootElem ? currRootElem.TTL : Infinity
     EXPIRED_KEY_REMOVAL_TIME = Math.min(EXPIRED_KEY_REMOVAL_TIME, expirationTimeOfHeapRootElem)
     setTimeout(removeExpiredKeysFromHeap, EXPIRED_KEY_REMOVAL_TIME)
@@ -97,12 +121,31 @@ function isKeyExpired(storedObject: ValueTTLObjectOfKeyValueStore) {
   else return false
 }
 
+function cacheItemGenerator(key: string, evictionPolicy: EvictionPolicies) {
+  return evictionPolicy === "LFU" ? {
+    key,
+    type: evictionPolicy,
+    frequency: 1
+  } : {
+    key,
+    type: evictionPolicy,
+    timestamp: Date.now()
+  }
+}
+
+function generateUpdateCacheOptions(cacheItem: NodeValue) {
+  return {
+    cacheItem,
+    storeCapacity: STORE_CAPACITY,
+    inMemoryStore: keyStoreMap,
+    minHeap,
+  }
+}
+
+
 removeExpiredKeysFromHeap()
 
 export {
-  addKeyValueToMap,
-  getValueFromMap,
-  deleteKeyFromMap,
-  MAX_TTL_VALUE
+  addKeyValueToMap, deleteKeyFromMap, getValueFromMap, MAX_TTL_VALUE
 }
 

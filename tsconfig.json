@@ -1,10 +1,11 @@
 {
   "compilerOptions": {
     "target": "ES2015",
-    "module": "es2015",
+    "module": "Node16",
     "outDir": "dist",
     "rootDir": "./src",
-    "strict": true
+    "strict": true,
+    "moduleResolution": "Node16"
   },
   "exclude": [
     "./test/"

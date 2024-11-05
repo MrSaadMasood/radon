@@ -1,23 +1,7 @@
-import { Node } from "./Node";
+import { NodeOrNull } from "../Types/exportedTypes.js";
+import { DoublyLinkedList } from "./DoublyLinkedList.js";
+import { Node } from "./Node.js";
 
-type NodeOrNull<T> = Node<T> | null
-
-class DoublyLinkedList<T> {
-  constructor(
-    protected head?: NodeOrNull<T>,
-    protected tail?: NodeOrNull<T>,
-    protected len: number = 0
-  ) { }
-
-  print() {
-    if (!this.head) return
-    let curr: NodeOrNull<T> = this.head;
-    while (curr) {
-      console.log(curr.val)
-      curr = curr.next
-    }
-  }
-}
 
 export class Queue<T> extends DoublyLinkedList<T> {
   constructor(
@@ -43,7 +27,6 @@ export class Queue<T> extends DoublyLinkedList<T> {
       this.tail.next = node
       this.tail = this.tail.next
       this.tail.prev = prev
-
     }
     this.len++
   }

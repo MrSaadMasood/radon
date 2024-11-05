@@ -1,4 +1,7 @@
+import { EvictionClasses } from "../Types/exportedTypes.js";
 import { ttlExpirationValidator } from "../utils/utils.js";
+import { LFUCache } from "./LFUCache.js";
+import { LRUCache } from "./LRUCache.js";
 
 class MinHeap {
   private readonly heapArray: HeapItem[]
@@ -15,7 +18,8 @@ class MinHeap {
     this.bubbleUpHeap(this.len - 1)
   }
 
-  cleanUpExpiredKeys(inMemoryStore: InMemoryStore) {
+
+  cleanUpExpiredKeys(inMemoryStore: InMemoryStore, currEvectionPolicy: EvictionClasses) {
     let rootElem = this.readRootElemValue()
     if (!rootElem) return
     const storedTimeStamp = inMemoryStore[rootElem.key].timestamp || 0
@@ -25,6 +29,7 @@ class MinHeap {
       const rootElemRemoved = this.getMinimum()
       rootElem = this.readRootElemValue()
       if (!rootElemRemoved) break
+      this.removeNodesFromEvictionQueue(currEvectionPolicy, rootElemRemoved)
       delete inMemoryStore[rootElemRemoved.key]
       if (!rootElem) return
       isTTLExpired = ttlExpirationValidator(rootElem.TTL + storedTimeStamp)
@@ -108,6 +113,18 @@ class MinHeap {
       this.swap(parentIndex, smallestElemIndex)
     }
     this.heapify(parentIndex - 1)
+  }
+
+  private removeNodesFromEvictionQueue(currEvectionPolicy: EvictionClasses, rootElemRemoved: HeapItem) {
+
+    if (currEvectionPolicy instanceof LRUCache) {
+      currEvectionPolicy.deleteCache(rootElemRemoved.key)
+    } else {
+      const deletedNode = currEvectionPolicy.delete(rootElemRemoved.key)
+      if (deletedNode && deletedNode.val.type === "LFU") {
+        currEvectionPolicy.adjustFrequency(deletedNode.val.frequency, "DEC")
+      }
+    }
   }
 
   readRootElemValue() {

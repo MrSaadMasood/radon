@@ -1,10 +1,13 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { MinHeap } from "../src/Classes/MinHeap";
+import { LFUCache } from "../src/Classes/LFUCache";
 
 describe(() => "test the min heap class functionality", () => {
 
   beforeAll(() => vi.useFakeTimers())
   afterAll(() => vi.useRealTimers())
+
+  const lfuCache = new LFUCache()
 
   it("should store the values correctly in min heap ", () => {
     const minHeap = new MinHeap()
@@ -34,19 +37,19 @@ describe(() => "test the min heap class functionality", () => {
     minHeap.insert({ key: "three", TTL: 20 })
 
     vi.advanceTimersByTime(14)
-    currRootElem = minHeap.cleanUpExpiredKeys(keyValueStore)
+    currRootElem = minHeap.cleanUpExpiredKeys(keyValueStore, lfuCache)
     expect(currRootElem).toBeDefined()
     expect(currRootElem.TTL).toBe(15)
     delete keyValueStore["one"]
 
     vi.advanceTimersByTime(4)
-    currRootElem = minHeap.cleanUpExpiredKeys(keyValueStore)
+    currRootElem = minHeap.cleanUpExpiredKeys(keyValueStore, lfuCache)
     expect(currRootElem).toBeDefined()
     expect(currRootElem.TTL).toBe(20)
     delete keyValueStore["two"]
 
     vi.advanceTimersByTime(25)
-    currRootElem = minHeap.cleanUpExpiredKeys(keyValueStore)
+    currRootElem = minHeap.cleanUpExpiredKeys(keyValueStore, lfuCache)
     expect(currRootElem).not.toBeDefined()
 
   })
