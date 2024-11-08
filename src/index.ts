@@ -51,6 +51,10 @@ app.delete("/del/:key", async (req: Request, res: Response) => {
   }
 })
 
+app.get("/ping", (_: Request, res: Response) => {
+  res.json("pong")
+})
+
 app.use((_, res: Response) => {
   res.status(500).json("Internal Server Error")
 })
