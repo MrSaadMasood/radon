@@ -5,11 +5,12 @@
   "type": "module",
   "main": "dist/index.js",
   "scripts": {
-    "test": "vitest run ./test/serialization.test.ts --coverage",
+    "test": "vitest run ./test/ --coverage",
     "dev": "tsx watch ./src/index.ts",
     "start": "tsc && node dist/index.js",
     "start:prod": "pm2 start -n radon dist/index.js",
-    "stop:prod": "pm2 delete radon"
+    "stop:prod": "pm2 delete radon",
+    "build": "tsc"
   },
   "author": "",
   "license": "ISC",
