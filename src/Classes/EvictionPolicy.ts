@@ -27,7 +27,7 @@ export abstract class EvictionPolicy<T> extends Queue<T> {
     const evictedNode = this.dequeue()
     if (!evictedNode) return
     this.cachedValuesMap.delete(evictedNode.val.key)
-    delete inMemoryStore[evictedNode.val.key]
+    inMemoryStore.delete(evictedNode.val.key)
     return evictedNode
   }
 

@@ -25,11 +25,12 @@ describe(() => "test the min heap class functionality", () => {
   })
 
   it("should clean up expired keys from the key value store", () => {
-    let currRootElem: HeapItem
-    const keyValueStore: InMemoryStore = {}
-    keyValueStore.one = { value: "random", timestamp: Date.now() }
-    keyValueStore.two = { value: "random", timestamp: Date.now() }
-    keyValueStore.three = { value: "random", timestamp: Date.now() }
+    let currRootElem
+    const keyValueStore = new Map(Object.entries({
+      one: { value: "random", timestamp: Date.now() },
+      two: { value: "random", timestamp: Date.now() },
+      three: { value: "random", timestamp: Date.now() }
+    }))
 
     const minHeap = new MinHeap()
     minHeap.insert({ key: "one", TTL: 2 })

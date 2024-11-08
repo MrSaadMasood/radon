@@ -4,12 +4,12 @@ import { MinHeap } from "../src/Classes/MinHeap";
 
 describe("should test the lru cache management", () => {
 
-  const inMemoryStore = {
+  const inMemoryStore = new Map(Object.entries({
     one: { random: "value", timestamp: Date.now() },
     two: { random: "value", timestamp: Date.now() },
     three: { random: "value", timestamp: Date.now() },
     four: { random: "value", timestamp: Date.now() },
-  }
+  }))
   const minHeap = new MinHeap()
 
   it("should correctly update the lru cache", () => {
@@ -65,5 +65,17 @@ describe("should test the lru cache management", () => {
     expect(lruCache.size()).toBe(0)
     expect(isCached).toBeNull()
 
+  })
+
+  it("should get all the node values from the cache", () => {
+
+    const lruCache = new LRUCache()
+
+    const storeCapacity = 3
+    lruCache.updateCache({ cacheItem: { key: "one", type: "LRU", timestamp: Date.now() }, storeCapacity, inMemoryStore, minHeap })
+    lruCache.updateCache({ cacheItem: { key: "two", type: "LRU", timestamp: Date.now() }, storeCapacity, inMemoryStore, minHeap })
+    lruCache.updateCache({ cacheItem: { key: "three", type: "LRU", timestamp: Date.now() }, storeCapacity, inMemoryStore, minHeap })
+
+    expect(lruCache.getAllNodesValues()).toHaveLength(3)
   })
 })

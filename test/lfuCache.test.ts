@@ -3,12 +3,13 @@ import { LFUCache } from "../src/Classes/LFUCache"
 import { MinHeap } from "../src/Classes/MinHeap"
 
 describe('should test the functionality of LFU caching and eviction mechanism', () => {
-  const inMemoryStore = {
+
+  const inMemoryStore = new Map(Object.entries({
     one: { random: "value", timestamp: Date.now() },
     two: { random: "value", timestamp: Date.now() },
     three: { random: "value", timestamp: Date.now() },
     four: { random: "value", timestamp: Date.now() },
-  }
+  }))
   const minHeap = new MinHeap()
   const storeCapacity = 4
 
@@ -92,7 +93,6 @@ describe('should test the functionality of LFU caching and eviction mechanism', 
     expect(lfuCache.isCached("one")).not.toBeDefined()
     expect(lfuCache.find("five")?.val.frequency).toBe(1)
     expect(lfuCache.isCached("five")).toBeTruthy()
-    lfuCache.print()
 
   })
 

@@ -1,28 +1,32 @@
 import { EvictionClasses } from "../Types/exportedTypes.js";
 import { ttlExpirationValidator } from "../utils/utils.js";
-import { LFUCache } from "./LFUCache.js";
 import { LRUCache } from "./LRUCache.js";
 
 class MinHeap {
-  private readonly heapArray: HeapItem[]
-  private len: number
+  private heapArray: HeapItem[]
 
   constructor() {
     this.heapArray = []
-    this.len = 0;
+  }
+
+  get heap() {
+    return this.heapArray
+  }
+
+  set heap(heap: HeapItem[]) {
+    if (Array.isArray(heap)) this.heapArray = heap
   }
 
   insert(heapItem: HeapItem) {
     this.heapArray.push(heapItem)
-    this.len++
-    this.bubbleUpHeap(this.len - 1)
+    this.bubbleUpHeap(this.heapArray.length - 1)
   }
 
 
   cleanUpExpiredKeys(inMemoryStore: InMemoryStore, currEvectionPolicy: EvictionClasses) {
     let rootElem = this.readRootElemValue()
     if (!rootElem) return
-    const storedTimeStamp = inMemoryStore[rootElem.key].timestamp || 0
+    const storedTimeStamp = (inMemoryStore.get(rootElem.key) || {}).timestamp || 0
     let isTTLExpired = ttlExpirationValidator(rootElem.TTL + storedTimeStamp)
 
     while (isTTLExpired) {
@@ -30,7 +34,7 @@ class MinHeap {
       rootElem = this.readRootElemValue()
       if (!rootElemRemoved) break
       this.removeNodesFromEvictionQueue(currEvectionPolicy, rootElemRemoved)
-      delete inMemoryStore[rootElemRemoved.key]
+      inMemoryStore.delete(rootElemRemoved.key)
       if (!rootElem) return
       isTTLExpired = ttlExpirationValidator(rootElem.TTL + storedTimeStamp)
     }
@@ -89,30 +93,31 @@ class MinHeap {
 
   deleteFromMinHeapAndUpdateWithNewValue(heapItem: HeapItem) {
     const { key, TTL } = heapItem
-    for (let i = 0; i < this.len; i++) {
+    const len = this.heapArray.length
+    for (let i = 0; i < len; i++) {
       if (this.heapArray[i].key === key) {
         this.heapArray[i].TTL = TTL
       }
     }
-    this.heapify(this.len - 1)
+    this.heapify(len - 1, len)
   }
 
-  private heapify(parentIndex: number) {
+  private heapify(parentIndex: number, heapLength: number) {
     if (parentIndex < 0) return
     let smallestElemIndex = parentIndex
     const leftChildIndex = parentIndex * 2 + 1
     const rightChildIndex = leftChildIndex - 1
 
-    if (leftChildIndex < this.len && this.heapArray[smallestElemIndex].TTL > this.heapArray[leftChildIndex].TTL)
+    if (leftChildIndex < heapLength && this.heapArray[smallestElemIndex].TTL > this.heapArray[leftChildIndex].TTL)
       smallestElemIndex = leftChildIndex
 
-    if (rightChildIndex < this.len && this.heapArray[smallestElemIndex].TTL > this.heapArray[rightChildIndex].TTL)
+    if (rightChildIndex < heapLength && this.heapArray[smallestElemIndex].TTL > this.heapArray[rightChildIndex].TTL)
       smallestElemIndex = rightChildIndex
 
     if (smallestElemIndex !== parentIndex) {
       this.swap(parentIndex, smallestElemIndex)
     }
-    this.heapify(parentIndex - 1)
+    this.heapify(parentIndex - 1, heapLength)
   }
 
   private removeNodesFromEvictionQueue(currEvectionPolicy: EvictionClasses, rootElemRemoved: HeapItem) {
@@ -130,6 +135,7 @@ class MinHeap {
   readRootElemValue() {
     return this.heapArray[0]
   }
+
   print() {
     console.log("The heap is", this.heapArray)
   }

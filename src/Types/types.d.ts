@@ -4,11 +4,10 @@ type HeapItem = {
   TTL: number
 }
 
-type InMemoryStore = {
-  [key: string]: ValueTTLObjectOfKeyValueStore
-}
 
-type ValueTTLObjectOfKeyValueStore = {
+type InMemoryStore = Map<string, MapValueObject>
+
+type MapValueObject = {
   value: any,
   timestamp?: number
   TTL?: number
@@ -27,4 +26,23 @@ type LFU = {
 }
 type NodeValue = LRU | LFU
 
-type EvictionPolicies = "LFU" | "LRU"
+type Policy = "LFU" | "LRU"
+
+type SerialDeserialBase = {
+  heap: HeapItem[],
+  cachedNodes: NodeValue[]
+}
+type Serialize = SerialDeserialBase & {
+  store: [string, any][]
+}
+
+type Deserialize = SerialDeserialBase & {
+  store: InMemoryStore
+}
+
+type SetRadonOptions = {
+  ttl?: string | number,
+  url?: string
+  parse?: boolean
+}
+

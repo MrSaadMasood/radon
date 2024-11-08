@@ -54,4 +54,15 @@ export class DoublyLinkedList<T> {
     }
     return null
   }
+
+  getAllNodesValues() {
+    const nodes: NodeValue[] = []
+    let curr = this.head
+    while (curr) {
+      nodes.push(curr.val)
+      curr = curr.next
+    }
+
+    return nodes
+  }
 }

@@ -1,151 +1,68 @@
-import { AsyncLock } from "./Classes/AsyncLock.js"
-import { LFUCache } from "./Classes/LFUCache.js"
-import { LRUCache } from "./Classes/LRUCache.js"
-import { MinHeap } from "./Classes/MinHeap.js"
-import { EVICTION_POLICY } from "./utils/envSchema.js"
-import { ttlExpirationValidator } from "./utils/utils.js"
+import express, { Request, Response } from "express"
+import { z } from "zod"
+import {
+  addKeyValueToStore, deleteKeyFromStore, deserializer, getValueFromStore, periodicallySerializeData,
+  removeExpiredKeysFromHeap
+} from "./controllerHelpers.js"
+import { PORT } from "./utils/envSchema.js"
 
-const keyStoreMap: InMemoryStore = {}
-const minHeap = new MinHeap()
-const asyncLock = new AsyncLock()
+const STORE_FILE = "store.json"
+const keyParamsSchema = z.object({ key: z.string() })
 
-const evictionPolicies = {
-  LRU: LRUCache,
-  LFU: LFUCache
-}
 
-const evictionPolicy = new evictionPolicies[EVICTION_POLICY]<NodeValue>()
+const app = express()
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
 
-let EXPIRED_KEY_REMOVAL_TIME = 1000
-const MAX_TTL_VALUE = 10000000
-const STORE_CAPACITY = 3
-
-async function addKeyValueToMap(key: string, value: any, TTL?: string | number) {
-  const objectToStore: ValueTTLObjectOfKeyValueStore = {
-    value,
+app.get("/get/:key", async (req: Request, res: Response) => {
+  try {
+    const params = req.params
+    const { key } = keyParamsSchema.parse(params)
+    const value = await getValueFromStore(key)
+    if (!value) res.status(404).json("Value Not Found")
+    res.json(value)
+  } catch (error) {
+    res.status(422).json("Key must be a string")
   }
+})
 
-  const timestamp = Date.now()
-
-  if (TTL) {
-    const ttl = TTLInputValidator(TTL)
-    await makeKeyStoreOperationsConsistent(
-      async () => {
-        await asyncLock.keyDataStoreProcessedAndLocked
-        const heapItem: HeapItem = { key, TTL: ttl }
-        if (keyStoreMap[key]) {
-          return minHeap.deleteFromMinHeapAndUpdateWithNewValue(heapItem)
-        } else {
-          minHeap.insert(heapItem)
-          objectToStore.TTL = ttl
-          objectToStore.timestamp = timestamp
-        }
-        const minHeapRootElem = minHeap.readRootElemValue()
-        EXPIRED_KEY_REMOVAL_TIME = minHeapRootElem.TTL
-      }
-    )
+app.post("/set", async (req: Request, res: Response) => {
+  try {
+    const body = req.body
+    const { key, value, ttl } = z.object(
+      { key: z.string(), value: z.any(), ttl: z.string().or(z.number()).optional() }
+    ).parse(body)
+    const added = await addKeyValueToStore(key, value, ttl)
+    if (!added) throw new Error()
+    res.json(`${key} Added Successfully`)
+  } catch (error) {
+    res.status(400).json("Failed To Add Key")
   }
+})
 
-  await makeKeyStoreOperationsConsistent(
-    async () => {
-      await asyncLock.keyDataStoreProcessedAndLocked
-      keyStoreMap[key] = objectToStore
-      evictionPolicy.updateCache(
-        generateUpdateCacheOptions(cacheItemGenerator(key, EVICTION_POLICY))
-      )
-    }
-  )
-}
+app.delete("/del/:key", async (req: Request, res: Response) => {
+  try {
+    const params = req.params
+    const { key } = keyParamsSchema.parse(params)
+    await deleteKeyFromStore(key)
+    res.json(`Deleted Key: ${key}`)
+  } catch (error) {
+    res.status(422).json("Key must be a string")
+  }
+})
 
-function TTLInputValidator(TTL: string | number) {
-  const isValidNumber = Number(TTL)
-  if (!isValidNumber) throw new Error("the TTL provided is not a number")
-  const flooredNumber = Math.floor(isValidNumber)
-  if (flooredNumber < MAX_TTL_VALUE) return flooredNumber
-  else throw new Error("TTL Limit Exceeded")
-}
+app.use((_, res: Response) => {
+  res.status(500).json("Internal Server Error")
+})
 
-
-async function getValueFromMap(key: string) {
-  let valueFromMap;
-
-  await makeKeyStoreOperationsConsistent(async () => {
-
-    await asyncLock.keyDataStoreProcessedAndLocked
-    let storedValue = keyStoreMap[key]
-    if (!storedValue) return
-
-    const keyExpired = isKeyExpired(storedValue)
-    if (keyExpired) {
-      delete keyStoreMap[key]
-      evictionPolicy.deleteCache(key)
-      return minHeap.deleteFromMinHeapAndUpdateWithNewValue({ key, TTL: -1 })
-    }
-    valueFromMap = storedValue.value
-    Promise.resolve(() => {
-      evictionPolicy.updateCache(generateUpdateCacheOptions(cacheItemGenerator(key, EVICTION_POLICY)))
-    })
+deserializer(STORE_FILE)
+  .then(() => {
+    periodicallySerializeData(5 * 60 * 1000, STORE_FILE)
+    removeExpiredKeysFromHeap()
+    app.listen(PORT, () => console.log("server running on port", PORT))
   })
-  return valueFromMap
-}
-
-async function deleteKeyFromMap(key: string) {
-  await makeKeyStoreOperationsConsistent(() => {
-    const deletedNode = evictionPolicy.deleteCache(key)
-    if (evictionPolicy instanceof LFUCache && deletedNode && deletedNode.val.type === "LFU") {
-      evictionPolicy.adjustFrequency(deletedNode.val.frequency, "DEC")
-    }
-    delete keyStoreMap[key]
+  .catch(error => {
+    console.log("deserialization step failed", error)
   })
-}
 
-async function removeExpiredKeysFromHeap() {
-  await makeKeyStoreOperationsConsistent(() => {
-    const currRootElem = minHeap.cleanUpExpiredKeys(keyStoreMap, evictionPolicy)
-    const expirationTimeOfHeapRootElem = currRootElem ? currRootElem.TTL : Infinity
-    EXPIRED_KEY_REMOVAL_TIME = Math.min(EXPIRED_KEY_REMOVAL_TIME, expirationTimeOfHeapRootElem)
-    setTimeout(removeExpiredKeysFromHeap, EXPIRED_KEY_REMOVAL_TIME)
-  })
-}
-
-async function makeKeyStoreOperationsConsistent(callback: () => void) {
-  await asyncLock.keyDataStoreProcessedAndLocked;
-  asyncLock.enable();
-  callback();
-  asyncLock.disable()
-}
-
-function isKeyExpired(storedObject: ValueTTLObjectOfKeyValueStore) {
-  if (!storedObject.timestamp || !storedObject.TTL) return false
-  if (ttlExpirationValidator(storedObject.TTL + storedObject.timestamp)) return true
-  else return false
-}
-
-function cacheItemGenerator(key: string, evictionPolicy: EvictionPolicies) {
-  return evictionPolicy === "LFU" ? {
-    key,
-    type: evictionPolicy,
-    frequency: 1
-  } : {
-    key,
-    type: evictionPolicy,
-    timestamp: Date.now()
-  }
-}
-
-function generateUpdateCacheOptions(cacheItem: NodeValue) {
-  return {
-    cacheItem,
-    storeCapacity: STORE_CAPACITY,
-    inMemoryStore: keyStoreMap,
-    minHeap,
-  }
-}
-
-
-removeExpiredKeysFromHeap()
-
-export {
-  addKeyValueToMap, deleteKeyFromMap, getValueFromMap, MAX_TTL_VALUE
-}
 
