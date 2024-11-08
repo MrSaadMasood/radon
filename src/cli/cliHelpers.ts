@@ -1,9 +1,10 @@
 import fs from "fs";
 import path from "path"
 import { exec } from 'child_process'
-import { PORT } from "../utils/envSchema.js";
+import { EVICTION_POLICY, PORT, STORE_CAPACITY } from "../utils/envSchema.js";
 
 const baseurl = `http:\\localhost:${PORT}`
+
 export function serverEnvFileExistenceChecker() {
   const filePath = path.join(process.cwd(), ".env")
   const fileExists = fs.existsSync(filePath)
@@ -15,7 +16,13 @@ export function startRadonServer() {
   exec("sh start-radon.sh", (error, stdout, stderr) => {
     if (error) console.log(error)
     else if (stderr) console.log(stderr)
-    else console.log(stdout)
+    else {
+      console.log(stdout)
+      console.log("Server started with following options")
+      console.log("Eviction Policy: ", EVICTION_POLICY)
+      console.log("Store Capacity: ", STORE_CAPACITY)
+      console.log("Port: ", PORT)
+    }
   })
 }
 
@@ -46,6 +53,8 @@ export async function setKeyValueInRadon(key: string, value: string, options: Se
     console.log(body)
   } catch (error) {
     console.log(error)
+  }
+  finally {
   }
 }
 
