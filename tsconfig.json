@@ -8,7 +8,5 @@
     "moduleResolution": "Node16",
     "resolveJsonModule": true
   },
-  "exclude": [
-    "./test/"
-  ]
+  "exclude": ["./test/"]
 }

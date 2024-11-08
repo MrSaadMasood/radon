@@ -1,52 +1,48 @@
 name: general-build-test-lint
 
 on:
-    push:
-        branches-ignore: 
-            - main
-    pull_request: 
-        branches: 
-            - main
-        types: 
-            - synchronize
-            - opened
+  push:
+    branches-ignore:
+      - main
+  pull_request:
+    branches:
+      - main
+    types:
+      - synchronize
+      - opened
 
-
-jobs: 
-    build-pipeline:
-        name: builder
-        defaults:
-            run:
-                working-directory: ./
-        environment: deployment
-        strategy:
-            matrix:
-                os: [windows-latest, ubuntu-latest]
-        runs-on: ${{ matrix.os }}
-        env: 
-            ENV_SECRETS: ${{ secrets.ENV_SECRETS }}
-        steps:
-            - uses: actions/checkout@v4
-            - uses: actions/setup-node@v4
-              with:
-                node-version: 20.x
-            - name: installing dependencies
-              run: npm ci
-            - name: building project on ubuntu
-              if: ${{ contains( matrix.os, 'ubuntu' )}}
-              run: |
-                echo "$ENV_SECRETS" >> .env
-                npm run build
-            - name: building project on windows
-              if: ${{ contains( matrix.os, 'windows')}}
-              run: |
-                $env:ENV_SECRETS | Out-File -FilePath .env -Append
-                npm run build
-              shell: pwsh
-            - name: linting
-              run : npm run lint 
-            - name: testing
-              run: npm run test
-
-    
-
+jobs:
+  build-pipeline:
+    name: builder
+    defaults:
+      run:
+        working-directory: ./
+    environment: deployment
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    env:
+      ENV_SECRETS: ${{ secrets.ENV_SECRETS }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+      - name: installing dependencies
+        run: npm ci
+      - name: building project on ubuntu
+        if: ${{ contains( matrix.os, 'ubuntu' )}}
+        run: |
+          echo "$ENV_SECRETS" >> .env
+          npm run build
+      - name: building project on windows
+        if: ${{ contains( matrix.os, 'windows')}}
+        run: |
+          $env:ENV_SECRETS | Out-File -FilePath .env -Append
+          npm run build
+        shell: pwsh
+      - name: linting
+        run: npm run lint
+      - name: testing
+        run: npm run test

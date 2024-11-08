@@ -1,48 +1,45 @@
-
 type HeapItem = {
-  key: string,
-  TTL: number
-}
+  key: string;
+  TTL: number;
+};
 
-
-type InMemoryStore = Map<string, MapValueObject>
+type InMemoryStore = Map<string, MapValueObject>;
 
 type MapValueObject = {
-  value: any,
-  timestamp?: number
-  TTL?: number
-}
+  value: any;
+  timestamp?: number;
+  TTL?: number;
+};
 
 type LRU = {
-  key: string
-  timestamp: number
-  type: "LRU"
-}
+  key: string;
+  timestamp: number;
+  type: "LRU";
+};
 
 type LFU = {
-  key: string
-  frequency: number
-  type: "LFU"
-}
-type NodeValue = LRU | LFU
+  key: string;
+  frequency: number;
+  type: "LFU";
+};
+type NodeValue = LRU | LFU;
 
-type Policy = "LFU" | "LRU"
+type Policy = "LFU" | "LRU";
 
 type SerialDeserialBase = {
-  heap: HeapItem[],
-  cachedNodes: NodeValue[]
-}
+  heap: HeapItem[];
+  cachedNodes: NodeValue[];
+};
 type Serialize = SerialDeserialBase & {
-  store: [string, any][]
-}
+  store: [string, any][];
+};
 
 type Deserialize = SerialDeserialBase & {
-  store: InMemoryStore
-}
+  store: InMemoryStore;
+};
 
 type SetRadonOptions = {
-  ttl?: string | number,
-  url?: string
-  parse?: boolean
-}
-
+  ttl?: string | number;
+  url?: string;
+  parse?: boolean;
+};

@@ -4,65 +4,64 @@ export class DoublyLinkedList<T> {
   constructor(
     protected head?: NodeOrNull<T>,
     protected tail?: NodeOrNull<T>,
-    protected len: number = 0
-  ) { }
+    protected len: number = 0,
+  ) {}
 
   print() {
-    if (!this.head) return
+    if (!this.head) return;
     let curr: NodeOrNull<T> = this.head;
     while (curr) {
-      console.log(curr.val)
-      curr = curr.next
+      console.log(curr.val);
+      curr = curr.next;
     }
   }
 
   delete(key: string): NodeOrNull<T> {
-    if (!this.head) return null
-    let deletedNode = null
-    let curr: NodeOrNull<T> = this.head
+    if (!this.head) return null;
+    let deletedNode = null;
+    let curr: NodeOrNull<T> = this.head;
     while (curr) {
       if (curr.val.key === key) {
-        deletedNode = curr
-        const isTailNodeDeleted = this.tail === deletedNode
-        const isHeadNodeDeletd = deletedNode === this.head
-        const { prev, next } = curr
+        deletedNode = curr;
+        const isTailNodeDeleted = this.tail === deletedNode;
+        const isHeadNodeDeletd = deletedNode === this.head;
+        const { prev, next } = curr;
         if (isHeadNodeDeletd) {
-          this.head = next
-          if (next) next.prev = null
-        }
-        else if (!isHeadNodeDeletd && prev) {
-          prev.next = next
+          this.head = next;
+          if (next) next.prev = null;
+        } else if (!isHeadNodeDeletd && prev) {
+          prev.next = next;
         }
         if (next) {
-          next.prev = prev
+          next.prev = prev;
         }
-        if (this.tail && isTailNodeDeleted) this.tail = this.tail.prev
-        this.len--
-        break
+        if (this.tail && isTailNodeDeleted) this.tail = this.tail.prev;
+        this.len--;
+        break;
       }
-      curr = curr.next
+      curr = curr.next;
     }
-    return deletedNode
+    return deletedNode;
   }
 
   find(key: string) {
     if (!this.head) return null;
     let curr: NodeOrNull<T> = this.head;
     while (curr) {
-      if (curr.val.key === key) return curr
-      curr = curr.next
+      if (curr.val.key === key) return curr;
+      curr = curr.next;
     }
-    return null
+    return null;
   }
 
   getAllNodesValues() {
-    const nodes: NodeValue[] = []
-    let curr = this.head
+    const nodes: NodeValue[] = [];
+    let curr = this.head;
     while (curr) {
-      nodes.push(curr.val)
-      curr = curr.next
+      nodes.push(curr.val);
+      curr = curr.next;
     }
 
-    return nodes
+    return nodes;
   }
 }
