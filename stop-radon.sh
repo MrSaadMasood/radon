@@ -1,3 +1,3 @@
 #!/usr/bin/env sh
 
-npm run stop:prod
+pm2 delete radon

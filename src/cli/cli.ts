@@ -4,11 +4,13 @@ import { Command } from "commander";
 import {
   deleteValueFromRadon,
   getValueFromRadon,
+  listWorkingDirOfPackage,
   serverEnvFileExistenceChecker,
   setKeyValueInRadon,
   startRadonServer,
   stopRadonServer,
-} from "./cli/cliHelpers.js";
+} from "./cliHelpers.js";
+
 const program = new Command();
 
 program
@@ -22,12 +24,20 @@ program
   .action(serverEnvFileExistenceChecker);
 
 program
+  .command("ldir")
+  .description("lists the current working directory")
+  .action(listWorkingDirOfPackage)
+
+
+program
   .command("start")
+  .option("-g, --global", "use when you directly cloned the github repo and installed package globally")
   .description("starts the radon server on the port as specified by env file")
   .action(startRadonServer);
 
 program
   .command("stop")
+  .option("-g, --global", "use when you directly cloned the github repo and installed package globally")
   .description("stops the radon server")
   .action(stopRadonServer);
 

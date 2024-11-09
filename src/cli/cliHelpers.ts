@@ -1,9 +1,8 @@
 import fs from "fs";
 import path from "path";
 import { exec } from "child_process";
-import { EVICTION_POLICY, PORT, STORE_CAPACITY } from "../utils/envSchema.js";
+import { BASE_URL, EVICTION_POLICY, PORT, STORE_CAPACITY } from "../utils/envSchema.js";
 
-const baseurl = `http:\\localhost:${PORT}`;
 
 export function serverEnvFileExistenceChecker() {
   const filePath = path.join(process.cwd(), ".env");
@@ -12,8 +11,9 @@ export function serverEnvFileExistenceChecker() {
   else console.log("env doest exists");
 }
 
-export function startRadonServer() {
-  exec("sh start-radon.sh", (error, stdout, stderr) => {
+export function startRadonServer(options: { global?: boolean }) {
+  const cmd = options.global ? "sh start-radon-global.sh" : "sh node_modules/radon-cli/start-radon.sh"
+  exec(cmd, (error, stdout, stderr) => {
     if (error) console.log(error);
     else if (stderr) console.log(stderr);
     else {
@@ -22,16 +22,26 @@ export function startRadonServer() {
       console.log("Eviction Policy: ", EVICTION_POLICY);
       console.log("Store Capacity: ", STORE_CAPACITY);
       console.log("Port: ", PORT);
+      console.log("Base Url", BASE_URL);
     }
   });
 }
 
-export function stopRadonServer() {
-  exec("sh stop-radon.sh", (error, stdout, stderr) => {
+export function stopRadonServer(options: { global?: boolean }) {
+  const cmd = options.global ? "sh stop-radon-global.sh" : "sh node_modules/radon-cli/stop-radon.sh"
+  exec(cmd, (error, stdout, stderr) => {
     if (error) console.log(error);
     else if (stderr) console.log(stderr);
     else console.log(stdout);
   });
+}
+
+export function listWorkingDirOfPackage() {
+  exec("ls -la", (error, stdout, stderr) => {
+    if (error) console.log(error);
+    else if (stderr) console.log(stderr);
+    else console.log(stdout);
+  })
 }
 
 export async function setKeyValueInRadon(
@@ -41,7 +51,7 @@ export async function setKeyValueInRadon(
 ) {
   try {
     if (options.parse) value = JSON.parse(value);
-    const url = options.url || baseurl;
+    const url = options.url || BASE_URL;
     const response = await fetch(`${url}/set`, {
       method: "POST",
       headers: {
@@ -57,6 +67,7 @@ export async function setKeyValueInRadon(
     console.log(body);
   } catch (error) {
     console.log(error);
+    console.log("Kindly use -p flag for objects/arrays");
   }
 }
 
@@ -65,7 +76,7 @@ export async function getValueFromRadon(
   options: { url?: string; parse?: boolean },
 ) {
   try {
-    const url = options.url || baseurl;
+    const url = options.url || BASE_URL;
     const response = await fetch(`${url}/get/${key}`, {
       method: "GET",
     });
@@ -81,7 +92,7 @@ export async function deleteValueFromRadon(
   options: { url?: string },
 ) {
   try {
-    const url = options.url || baseurl;
+    const url = options.url || BASE_URL;
     const response = await fetch(`${url}/del/${key}`, {
       method: "DELETE",
     });
