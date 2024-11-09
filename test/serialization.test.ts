@@ -13,18 +13,52 @@ describe("tests the serialzation of InMemoryStore, min heap and the LRU / LFU Ca
   const filename = "testStore.json";
   const filePath = path.join(process.cwd(), filename);
   const toSerialize = {
-    store: Array.from(
-      new Map(
-        Object.entries({
-          one: { value: "value1" },
-          two: { value: "value2", TTL: 5, timestamp: Date.now() - 2000 }, // has TTL and timestamp
-          three: { value: "value3", TTL: 10, timestamp: Date.now() - 5000 }, // has TTL and timestamp
-          four: { value: "value4" },
-          five: { value: "value5", TTL: 7, timestamp: Date.now() - 3000 }, // has TTL and timestamp
-          six: { value: "value6", TTL: 500, timestamp: Date.now() },
-        }),
-      ),
-    ),
+    store: [
+      [
+        "one",
+        {
+          "value": "value1"
+        }
+      ],
+      [
+        "two",
+        {
+          "value": "value2",
+          "TTL": 5,
+          "timestamp": Date.now()
+        }
+      ],
+      [
+        "three",
+        {
+          "value": "value3",
+          "TTL": 10,
+          "timestamp": Date.now()
+        }
+      ],
+      [
+        "four",
+        {
+          "value": "value4"
+        }
+      ],
+      [
+        "five",
+        {
+          "value": "value5",
+          "TTL": 7,
+          "timestamp": Date.now()
+        }
+      ],
+      [
+        "six",
+        {
+          "value": "value6",
+          "TTL": 500,
+          "timestamp": Date.now()
+        }
+      ]
+    ],
 
     heap: [
       { key: "two", TTL: 5 },
@@ -62,7 +96,7 @@ describe("tests the serialzation of InMemoryStore, min heap and the LRU / LFU Ca
   it("should clean up expired keys successfully", () => {
     const { store, heap, cachedNodes } = toSerialize;
     const { storeAfterCleanup, useableHeap, cachedNodeWithExpiredKeysRemoved } =
-      cleanUpExpiredKeys(new Map(store), heap, cachedNodes);
+      cleanUpExpiredKeys(new Map(store as [unknown, unknown][]), heap, cachedNodes);
     expect(storeAfterCleanup.size).toBe(3);
     expect(useableHeap).toHaveLength(1);
     expect(cachedNodeWithExpiredKeysRemoved).toHaveLength(3);
@@ -74,7 +108,7 @@ describe("tests the serialzation of InMemoryStore, min heap and the LRU / LFU Ca
   it("should add the cleanedUp nodes in the cache", () => {
     const { store, heap, cachedNodes } = toSerialize;
     const { cachedNodeWithExpiredKeysRemoved } = cleanUpExpiredKeys(
-      new Map(store),
+      new Map(store as [unknown, unknown][]),
       heap,
       cachedNodes,
     );
