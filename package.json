@@ -1,6 +1,6 @@
 {
   "name": "radon-cli",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "in-memory key value store",
   "type": "module",
   "main": "dist/cli/cli.js",
