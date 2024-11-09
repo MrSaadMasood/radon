@@ -8,7 +8,8 @@ import {
   setKeyValueInRadon,
   startRadonServer,
   stopRadonServer,
-} from "./cli/cliHelpers.js";
+} from "./cliHelpers.js";
+
 const program = new Command();
 
 program

@@ -1,9 +1,13 @@
 {
-  "name": "radon",
+  "name": "radon-cli",
   "version": "1.0.0",
   "description": "in-memory key value store",
   "type": "module",
-  "main": "dist/index.js",
+  "main": "dist/cli/cli.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MrSaadMasood/radon.git"
+  },
   "scripts": {
     "test": "vitest run ./test/ --coverage",
     "dev": "tsx watch ./src/index.ts",
@@ -14,7 +18,7 @@
     "pretty": "prettier . --write",
     "lint": "eslint ./src "
   },
-  "author": "",
+  "author": "saadingo",
   "license": "ISC",
   "devDependencies": {
     "@eslint/js": "^9.14.0",
@@ -37,6 +41,12 @@
     "zod": "^3.23.8"
   },
   "bin": {
-    "radon": "dist/cli.js"
-  }
+    "radon": "dist/cli/cli.js"
+  },
+  "keywords": [
+    "radon-cli",
+    "key value store",
+    "key store",
+    "value store"
+  ]
 }
