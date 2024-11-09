@@ -4,6 +4,7 @@ import { Command } from "commander";
 import {
   deleteValueFromRadon,
   getValueFromRadon,
+  listWorkingDirOfPackage,
   serverEnvFileExistenceChecker,
   setKeyValueInRadon,
   startRadonServer,
@@ -21,6 +22,12 @@ program
   .command("check-env")
   .description("checks if the env file exists for the server")
   .action(serverEnvFileExistenceChecker);
+
+program
+  .command("ldir")
+  .description("lists the current working directory")
+  .action(listWorkingDirOfPackage)
+
 
 program
   .command("start")

@@ -12,7 +12,7 @@ export function serverEnvFileExistenceChecker() {
 }
 
 export function startRadonServer() {
-  exec("sh start-radon.sh", (error, stdout, stderr) => {
+  exec("sh ../../start-radon.sh", (error, stdout, stderr) => {
     if (error) console.log(error);
     else if (stderr) console.log(stderr);
     else {
@@ -26,8 +26,16 @@ export function startRadonServer() {
   });
 }
 
+export function listWorkingDirOfPackage() {
+  exec("ls -la", (error, stdout, stderr) => {
+    if (error) console.log(error);
+    else if (stderr) console.log(stderr);
+    else console.log(stdout);
+  })
+}
+
 export function stopRadonServer() {
-  exec("sh stop-radon.sh", (error, stdout, stderr) => {
+  exec("sh ../../stop-radon.sh", (error, stdout, stderr) => {
     if (error) console.log(error);
     else if (stderr) console.log(stderr);
     else console.log(stdout);
