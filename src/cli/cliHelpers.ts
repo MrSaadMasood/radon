@@ -11,8 +11,10 @@ export function serverEnvFileExistenceChecker() {
   else console.log("env doest exists");
 }
 
-export function startRadonServer() {
-  exec("sh ../../start-radon.sh", (error, stdout, stderr) => {
+export function startRadonServer(options: { global?: boolean }) {
+  console.log("the global is", options.global)
+  const cmd = options.global ? "sh start-radon-global.sh" : "sh node_modules/radon-cli/start-radon.sh"
+  exec(cmd, (error, stdout, stderr) => {
     if (error) console.log(error);
     else if (stderr) console.log(stderr);
     else {
@@ -26,20 +28,21 @@ export function startRadonServer() {
   });
 }
 
+export function stopRadonServer(options: { global?: boolean }) {
+  const cmd = options.global ? "sh stop-radon-global.sh" : "sh node_modules/radon-cli/stop-radon.sh"
+  exec(cmd, (error, stdout, stderr) => {
+    if (error) console.log(error);
+    else if (stderr) console.log(stderr);
+    else console.log(stdout);
+  });
+}
+
 export function listWorkingDirOfPackage() {
   exec("ls -la", (error, stdout, stderr) => {
     if (error) console.log(error);
     else if (stderr) console.log(stderr);
     else console.log(stdout);
   })
-}
-
-export function stopRadonServer() {
-  exec("sh ../../stop-radon.sh", (error, stdout, stderr) => {
-    if (error) console.log(error);
-    else if (stderr) console.log(stderr);
-    else console.log(stdout);
-  });
 }
 
 export async function setKeyValueInRadon(

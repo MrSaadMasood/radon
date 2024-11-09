@@ -1,4 +1,4 @@
 #!/usr/bin/env sh
 
-npm run build
-npm run start:prod
+tsc node_modules/radon-cli/src
+pm2 start -n radon dist/index.js
