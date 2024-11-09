@@ -1,0 +1,14 @@
+{
+  "store": [
+    ["one", { "value": "{\"one\" : \"hello\"}" }],
+    ["two", { "value": "{random" }],
+    ["hello", { "value": "[1,2,3]" }]
+  ],
+  "cachedNodes": [
+    { "key": "two", "type": "LRU", "timestamp": 1731089843065 },
+    { "key": "hello", "type": "LRU", "timestamp": 1731091232583 },
+    { "key": "one", "type": "LRU", "timestamp": 1731094511293 },
+    { "key": "one", "type": "LRU", "timestamp": 1731094594517 }
+  ],
+  "heap": []
+}

@@ -1,0 +1,25 @@
+name: auto-tag-yml
+
+on: 
+    pull_request: 
+        types: 
+            - closed
+        branches: 
+            - main
+
+jobs:
+    auto-tagger:
+        if: ${{ github.event.pull_request.merged == true && !contains( toJson(github.event.commits.*.message), '#skip')}}
+        runs-on: ubuntu-latest
+        permissions: 
+            contents: write
+        steps:
+            - uses: actions/checkout@v4
+            - name: bumps version
+              uses: anothrNick/github-tag-action@1.67.0
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                WITH_V : true
+                RELEASE_BRANCHES: main
+                DEFAULT_BUMP: patch
+        
