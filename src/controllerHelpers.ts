@@ -27,7 +27,7 @@ const evictionPolicy = new evictionPolicies[EVICTION_POLICY]<NodeValue>();
 
 async function addKeyValueToStore(
   key: string,
-  value: any,
+  value: unknown,
   TTL?: string | number,
 ) {
   if (value instanceof Date) value = value.toDateString();
@@ -68,7 +68,7 @@ async function addKeyValueToStore(
 }
 
 async function getValueFromStore(key: string) {
-  let valueFromMap: any;
+  let valueFromMap: unknown;
 
   await makeKeyStoreOperationsConsistent(async () => {
     await asyncLock.keyDataStoreProcessedAndLocked;

@@ -6,7 +6,7 @@ type HeapItem = {
 type InMemoryStore = Map<string, MapValueObject>;
 
 type MapValueObject = {
-  value: any;
+  value: unknown;
   timestamp?: number;
   TTL?: number;
 };
@@ -31,7 +31,7 @@ type SerialDeserialBase = {
   cachedNodes: NodeValue[];
 };
 type Serialize = SerialDeserialBase & {
-  store: [string, any][];
+  store: [string, unknown][];
 };
 
 type Deserialize = SerialDeserialBase & {
