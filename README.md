@@ -177,6 +177,13 @@ npm test
 
 ## API Documentation
 
+Base URL
+
+```
+http://localhost:<PORT>  // as specified in .env (for cloned project)
+                        //or in node_modules/radon-cli/.env (for dependency install)
+```
+
 ### Endpoints
 
 1. **GET `/get/:key`**
