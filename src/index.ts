@@ -8,7 +8,7 @@ import {
   periodicallySerializeData,
   removeExpiredKeysFromHeap,
 } from "./controllerHelpers.js";
-import { PORT } from "./utils/envSchema.js";
+import { BACKUP_TIME, PORT } from "./utils/envSchema.js";
 
 const STORE_FILE = "store.json";
 const keyParamsSchema = z.object({ key: z.string() });
@@ -71,7 +71,7 @@ app.use((_, res: Response) => {
 
 deserializer(STORE_FILE)
   .then(() => {
-    periodicallySerializeData(5 * 60 * 1000, STORE_FILE);
+    periodicallySerializeData(BACKUP_TIME, STORE_FILE);
     removeExpiredKeysFromHeap();
     app.listen(PORT, () => console.log("server running on port", PORT));
   })

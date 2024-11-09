@@ -71,26 +71,26 @@ export function TTLInputValidator(TTL: string | number, MAX_TTL_VALUE: number) {
 export function cacheItemGenerator(key: string, policy: Policy) {
   return policy === "LFU"
     ? {
-        key,
-        type: policy,
-        frequency: 1,
-      }
+      key,
+      type: policy,
+      frequency: 1,
+    }
     : {
-        key,
-        type: policy,
-        timestamp: Date.now(),
-      };
+      key,
+      type: policy,
+      timestamp: Date.now(),
+    };
 }
 
-export async function parseJsonFile(filename: string) {
+export async function parseJsonFile(filename: string): Promise<Deserialize | undefined> {
   try {
     const filePath = path.join(process.cwd(), filename);
     const jsonFile = await readFile(filePath, "utf8");
-    const parsedJson: Deserialize = JSON.parse(jsonFile, (k, v) => {
+    const parsedJson = JSON.parse(jsonFile);
+    return JSON.parse(parsedJson, (k, v) => {
       if (k === "store") return new Map(v);
       return v;
     });
-    return parsedJson;
   } catch (error) {
     console.log("parsing the store file failed", error);
     return;

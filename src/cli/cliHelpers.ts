@@ -5,7 +5,7 @@ import { BASE_URL, EVICTION_POLICY, PORT, STORE_CAPACITY } from "../utils/envSch
 
 
 export function serverEnvFileExistenceChecker() {
-  const filePath = path.join(process.cwd(), ".env");
+  const filePath = path.join(process.cwd(), "node_modules/radon-cli/", ".env");
   const fileExists = fs.existsSync(filePath);
   if (fileExists) console.log("the env exists");
   else console.log("env doest exists");
