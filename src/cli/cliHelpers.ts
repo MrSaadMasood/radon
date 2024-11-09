@@ -12,7 +12,6 @@ export function serverEnvFileExistenceChecker() {
 }
 
 export function startRadonServer(options: { global?: boolean }) {
-  console.log("the global is", options.global)
   const cmd = options.global ? "sh start-radon-global.sh" : "sh node_modules/radon-cli/start-radon.sh"
   exec(cmd, (error, stdout, stderr) => {
     if (error) console.log(error);
