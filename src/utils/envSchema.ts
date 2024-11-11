@@ -10,7 +10,7 @@ const envSchema = z.object({
   }).default(100 * 1000),
   PORT: z.coerce.number().transform((val) => val === 0 ? 4772 : val).default(4772),
   BASE_URL: z.string().catch("http://localhost:4772"),
-  BACKUP_TIME: z.coerce.number().catch(1 * 30 * 1000),
+  BACKUP_TIME: z.coerce.number().catch(5 * 60 * 1000),
   CROSS_ORIGIN: z.string().url().optional()
 });
 
