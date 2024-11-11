@@ -35,25 +35,25 @@ async function addKeyValueToStore(
     value,
   };
 
-  const timestamp = Date.now();
-
+  const timestamp = Date.now()
   if (TTL) {
     let ttlInMiliseconds = TTLInputValidator(TTL, MAX_TTL_VALUE);
     if (!ttlInMiliseconds) return;
     ttlInMiliseconds = ttlInMiliseconds * 1000;
+
     await makeKeyStoreOperationsConsistent(async () => {
       await asyncLock.keyDataStoreProcessedAndLocked;
       const isKeyAlreadyPresent = inMemoryStore.has(key);
       const heapItem: HeapItem = { key, TTL: ttlInMiliseconds };
       if (isKeyAlreadyPresent) {
-        return minHeap.deleteFromMinHeapAndUpdateWithNewValue(heapItem);
+        minHeap.deleteFromMinHeapAndUpdateWithNewValue(heapItem);
       } else {
         minHeap.insert(heapItem);
-        objectToStore.TTL = ttlInMiliseconds;
-        objectToStore.timestamp = timestamp;
       }
+      objectToStore.TTL = ttlInMiliseconds;
+      objectToStore.timestamp = timestamp;
       const minHeapRootElem = minHeap.readRootElemValue();
-      EXPIRED_KEY_REMOVAL_TIME = minHeapRootElem.TTL;
+      if (minHeapRootElem) EXPIRED_KEY_REMOVAL_TIME = minHeapRootElem.TTL;
     });
   }
 
