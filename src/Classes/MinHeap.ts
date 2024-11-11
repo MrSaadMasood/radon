@@ -31,13 +31,12 @@ class MinHeap {
     const storedTimeStamp =
       (inMemoryStore.get(rootElem.key) || {}).timestamp || 0;
     let isTTLExpired = ttlExpirationValidator(rootElem.TTL + storedTimeStamp);
-
     while (isTTLExpired) {
       const rootElemRemoved = this.getMinimum();
-      rootElem = this.readRootElemValue();
       if (!rootElemRemoved) break;
       this.removeNodesFromEvictionQueue(currEvectionPolicy, rootElemRemoved);
       inMemoryStore.delete(rootElemRemoved.key);
+      rootElem = this.readRootElemValue();
       if (!rootElem) return;
       isTTLExpired = ttlExpirationValidator(rootElem.TTL + storedTimeStamp);
     }
@@ -123,7 +122,7 @@ class MinHeap {
     if (
       rightChildIndex < heapLength &&
       this.heapArray[smallestElemIndex].TTL >
-        this.heapArray[rightChildIndex].TTL
+      this.heapArray[rightChildIndex].TTL
     )
       smallestElemIndex = rightChildIndex;
 

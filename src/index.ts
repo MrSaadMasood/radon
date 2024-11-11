@@ -2,6 +2,7 @@ import express, { Request, Response } from "express";
 import { z } from "zod";
 import morgan from "morgan"
 import helmet from "helmet"
+import cors from "cors"
 import {
   addKeyValueToStore,
   deleteKeyFromStore,
@@ -10,7 +11,7 @@ import {
   periodicallySerializeData,
   removeExpiredKeysFromHeap,
 } from "./controllerHelpers.js";
-import { BACKUP_TIME, PORT } from "./utils/envSchema.js";
+import { BACKUP_TIME, PORT, CROSS_ORIGIN } from "./utils/envSchema.js";
 
 const STORE_FILE = "store.json";
 const keyParamsSchema = z.object({ key: z.string() });
@@ -20,6 +21,9 @@ app.use(morgan("short"))
 app.use(helmet())
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cors({
+  origin: CROSS_ORIGIN || true
+}))
 app.get("/get/:key", async (req: Request, res: Response) => {
   try {
     const params = req.params;

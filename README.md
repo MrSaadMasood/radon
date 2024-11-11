@@ -151,6 +151,8 @@ Configure the following variables in your `.env` file:
 - `PORT`: The port on which the server runs.
 - `STORE_CAPACITY`: The maximum number of entries the store can hold.
 - `EVICTION_POLICY`: Set to `LRU` or `LFU`.
+- `BACKUP_TIME`: Time To Backup the store in memory to disk (Time Should be converted to milliseconds)
+- `CROSS_ORIGIN`: URL for cors policy (Optional)
 
 Defaults To:
 
@@ -159,6 +161,9 @@ BASE_URL=http://localhost:4772
 PORT=4772
 STORE_CAPACITY=10000000
 EVICTION_POLICY=LRU
+BACKUP_TIME=5*60*100 (5 minutes)
+CROSS_ORIGIN=true
+
 ```
 
 ## Testing
