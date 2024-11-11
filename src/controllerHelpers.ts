@@ -122,7 +122,11 @@ async function makeKeyStoreOperationsConsistent(callback: () => void) {
 
 async function serializer(toSerialize: Serialize, filename: string) {
   await makeKeyStoreOperationsConsistent(async () => {
-    await writeFile(filename, JSON.stringify(toSerialize));
+    try {
+      await writeFile(filename, JSON.stringify(toSerialize));
+    } catch (error) {
+      console.log("serialization failed", error)
+    }
   });
 }
 
@@ -176,7 +180,6 @@ export {
   deserializer,
   getValueFromStore,
   MAX_TTL_VALUE,
-  serializer,
   periodicallySerializeData,
-  removeExpiredKeysFromHeap,
+  removeExpiredKeysFromHeap, serializer
 };

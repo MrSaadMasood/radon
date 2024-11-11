@@ -8,7 +8,7 @@ export class LRUCache<T> extends EvictionPolicy<T> {
     inMemoryStore,
     minHeap,
   }: UpdateCacheOptions) {
-    const isEvictionPolicyApplicable = this.size() === storeCapacity;
+    const isEvictionPolicyApplicable = this.size() >= storeCapacity;
     const alreadyCached = this.cachedValuesMap.get(cacheItem.key);
     if (alreadyCached) this.deleteCache(cacheItem.key);
     else if (!alreadyCached && isEvictionPolicyApplicable) {

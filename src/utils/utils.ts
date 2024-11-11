@@ -86,11 +86,11 @@ export async function parseJsonFile(filename: string): Promise<Deserialize | und
   try {
     const filePath = path.join(process.cwd(), filename);
     const jsonFile = await readFile(filePath, "utf8");
-    const parsedJson = JSON.parse(jsonFile);
-    return JSON.parse(parsedJson, (k, v) => {
+    const parsedJson = JSON.parse(jsonFile, (k, v) => {
       if (k === "store") return new Map(v);
       return v;
     });
+    return parsedJson;
   } catch (error) {
     console.log("parsing the store file failed", error);
     return;
