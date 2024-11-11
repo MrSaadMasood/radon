@@ -16,7 +16,7 @@ export class LFUCache<T> extends EvictionPolicy<T> {
     inMemoryStore,
     minHeap,
   }: UpdateCacheOptions) {
-    const storeFullAndEvictionPolicyApplicable = this.size() === storeCapacity;
+    const storeFullAndEvictionPolicyApplicable = this.size() >= storeCapacity;
     const alreadyCached = this.cachedValuesMap.get(cacheItem.key);
     const updatedFrequency = (alreadyCached || 0) + 1;
 
