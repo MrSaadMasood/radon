@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   cacheItemGenerator,
-  parseJsonFile,
-  TTLInputValidator,
+  TTLInputValidator
 } from "../src/utils/utils";
 
 describe("should test the utils properly", () => {
@@ -22,7 +21,7 @@ describe("should test the utils properly", () => {
     expect(cacheItemGenerator("two", "LRU")).toEqual({
       key: "two",
       type: "LRU",
-      timestamp: Date.now(),
+      timestamp: expect.any(Number),
     });
   });
 });

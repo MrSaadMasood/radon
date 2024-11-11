@@ -1,1 +1,1 @@
-{"store":[["one ",{"value":"one ","TTL":42000,"timestamp":1731337852126}]],"cachedNodes":[{"key":"one ","type":"LRU","timestamp":1731337852126}],"heap":[{"key":"one ","TTL":42000}]}
+{"store":[],"cachedNodes":[],"heap":[]}
